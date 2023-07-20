@@ -1,85 +1,125 @@
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
+
 
 public class Program {
-    static void showToys(List <Toy> toys) {
+    public static void showToys(List <Toy> toys) {        
         if (toys.size() == 0) {
             System.out.println("\nИгрушки закончились!\n");
         } else {
-            System.out.println("\nСписок игрушек: \n");
+            System.out.println("Игрушки, доступные для розыгрыша: ");
             for (Toy toy : toys) {
                 System.out.println(toy.toString());
             }
         }
     }
 
-    static void menu(List <Toy> toys) {
-        Scanner scanner = new Scanner(System.in);
-        String choice = "";
+    public static void menu(List <Toy> toys) {
+        int choice = -1;
         String name = "";
         int weight = 0;
-
+        Scanner scanner = new Scanner(System.in);
+        Random rand = new Random();
         while (true) {
-            System.out.println("\nhttps://github.com/RussellMorryson\n");
-            System.out.println("======================================");
-            System.out.println("|                 Меню               |");
-            System.out.println("======================================");
-            System.out.println("1 / add - Добавить новую игрушку");
-            System.out.println("2 / show - Вывести список оставшихся игрушек");
-            System.out.println("3 / raffle - Разыграть игрушку");
-            System.out.println("0 / exit - Выход\n");
-            System.out.println("Введите команду: ");
-            choice = scanner.nextLine();
-            System.out.println("***************************************");
-            if (choice == "1" || choice.toLowerCase() == "add") {
-                System.out.print("Операция: Добавить игрушку.\nВведите название игрушки: ");
-                    name = scanner.nextLine();
-                System.out.print("Введите 'вес' (вероятность выпадения) игрушки: ");
-                    weight = scanner.nextInt();
-                Toy newToy = new Toy(name, weight);
-                    name = "";
-                    weight = 0;
-                    toys.add(newToy);
-                System.out.println("\nИгрушка " + newToy.getName() + " добавлена! \nОперация выполнена!\n");
-                
-            } else if (choice == "2" || choice.toLowerCase() == "show") {                
+            System.out.println("###############################################");
+            System.out.println("# https://github.com/RussellMorryson          #");
+            System.out.println("# =========================================== #");
+            System.out.println("# |                 Меню                    | #");
+            System.out.println("# =========================================== #");
+            System.out.println("# [1]  - Вывести список игрушек               #");
+            System.out.println("# [2]  - Добавить новую игрушку               #");
+            System.out.println("# [3]  - Разыграть игрушку                    #");
+            System.out.println("# [0]  - Выход                                #");
+            System.out.println("###############################################");
+            System.out.println("# Введите команду: ");
+            
+            choice = scanner.nextInt();           
+            
+            if (choice == 1) {
                 showToys(toys);
-                System.out.println("\nОперация выполнена!\n");   
-            } else if (choice == "3" || choice.toLowerCase() == "raffle") {                
-                List <Integer> raffleArray = new ArrayList<>();
+                System.out.println("\nНажмите любую клавишу и Enter для выхода в главное меню: ");    
+                choice = scanner.nextInt();
+                choice =-1;
+            } else if (choice == 2) {
+                System.out.print("Добавление новой игрушки.\nВведите название игрушки: ");
+                name = scanner.next();
+
+                System.out.print("Введите 'вес' (вероятность выпадения) игрушки: ");
+                weight = scanner.nextInt();
+                
+                Toy newToy = new Toy(name, weight);
+                name = "";
+                weight = 0;
+                toys.add(newToy);
+                System.out.println("\nИгрушка " + newToy.getName() + " добавлена! \nОперация выполнена!");
+                System.out.println("\nНажмите любую клавишу и Enter для выхода в главное меню: ");
+                choice = scanner.nextInt();
+                choice =-1;
+            } else if (choice == 3) {                
+                List<Integer> firstDischargeArray = new ArrayList<>();
+                List<Integer> randArray = new ArrayList<>();
+                List<Integer> raffleArray = new ArrayList<>();
+                
+                for (Toy toy : toys) {
+                    for(int i =0; i < toy.getWeight(); i++) {
+                        firstDischargeArray.add(toy.getID());
+                    }
+                }          
+                
+                int indexId = 0;
+                int count = 0;
+                for(int i = 0; i < firstDischargeArray.size(); i++) {                    
+                    while(true) {
+                        indexId = 0;
+                        count = 0;
+                        indexId = rand.nextInt(firstDischargeArray.size());
+                        if (randArray.size() == 0) {
+                            randArray.add(indexId);
+                        } else {                        
+                            for(int j =0; j < randArray.size(); j++) {
+                                if (randArray.get(j) == indexId) {
+                                    count++;
+                                }
+                            }
+                        }
+                        if (count == 0) {
+                            randArray.add(indexId);
+                            break;
+                        }
+                    }
+                    raffleArray.add(firstDischargeArray.get(indexId));
+                }
+                indexId = rand.nextInt(raffleArray.size());
                 for(Toy toy : toys) {
-                    for(int i = 0; i < toy.getWeight(); i++) {
-                        raffleArray.add(toy.getWeight());
+                    if (toy.getID() == raffleArray.get(indexId)) {
+                        System.out.println("Вы выиграли: " + toy.getName());
+                        toys.remove(toy);
+                        System.out.println("Находятся в розыгрыше: ");
+                        showToys(toys);
                     }
                 }
+                System.out.println("\nНажмите любую клавишу и Enter для выхода в главное меню: ");
+                choice = scanner.nextInt();
+                choice =-1;
+            } else {
+                System.out.println("\nКоманда введена некорректно!\nПовторите попытку!\n");
             }
         }
-    }     
+    }
 
     public static void main(String[] args) {
+
         Toy toy1 = new Toy("Bear",4);
         Toy toy2 = new Toy("Rabbit", 2);
         Toy toy3 = new Toy("Car", 3);
         Toy toy4 = new Toy("Duck", 3);
 
-/*
-        PriorityQueue <Toy> queueToys = new PriorityQueue<>();
-        queueToys.add(toy1);
-        queueToys.add(toy2);
-        queueToys.add(toy3);
-        queueToys.add(toy4);
-        for(Toy t : queueToys) {
-            System.out.println(t.getWeight());
-        }*/
-        List <Toy> toys = new ArrayList<>();
+        List <Toy> toys = new ArrayList<Toy>();
         toys.add(toy1);
         toys.add(toy2);
         toys.add(toy3);
         toys.add(toy4);
 
-        System.out.println("Игрушки, доступные для розыгрыша: ");
-        showToys(toys);
         menu(toys);
     }
+      
 }
