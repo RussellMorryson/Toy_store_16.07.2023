@@ -1,5 +1,6 @@
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.*;
-
 
 public class Program {
     public static void showToys(List <Toy> toys) {        
@@ -7,21 +8,36 @@ public class Program {
             System.out.println("\nИгрушки закончились!\n");
         } else {
             System.out.println("Игрушки, доступные для розыгрыша: ");
-            for (Toy toy : toys) {
-                System.out.println(toy.toString());
-            }
+            for (Toy toy : toys) { System.out.println(toy.toString()); }
         }
     }
 
+    public static void writingToFile(String text) {        
+        try(FileWriter fw = new FileWriter("Notes.txt", true)) {
+            fw.write("Розыграна игрушка: " + text + ".\n");    
+            fw.close();
+        } catch (IOException e) { System.out.println(e.getMessage()); }        
+    }
+
+    public static void clearFile() {        
+        try(FileWriter fw = new FileWriter("Notes.txt", false)) {
+            fw.write("");    
+            fw.close();
+        } catch (IOException e) { System.out.println(e.getMessage()); }        
+    }
+
     public static void menu(List <Toy> toys) {
+        clearFile();
+        Scanner scanner = new Scanner(System.in);
+        Random rand = new Random();        
         int choice = -1;
         String name = "";
         int weight = 0;
-        Scanner scanner = new Scanner(System.in);
-        Random rand = new Random();
+        
         while (true) {
             System.out.println("###############################################");
             System.out.println("# https://github.com/RussellMorryson          #");
+            System.out.println("# Программа для розыгрыша игрушек             #");
             System.out.println("# =========================================== #");
             System.out.println("# |                 Меню                    | #");
             System.out.println("# =========================================== #");
@@ -54,56 +70,64 @@ public class Program {
                 System.out.println("\nНажмите любую клавишу и Enter для выхода в главное меню: ");
                 choice = scanner.nextInt();
                 choice =-1;
-            } else if (choice == 3) {                
-                List<Integer> firstDischargeArray = new ArrayList<>();
-                List<Integer> randArray = new ArrayList<>();
-                List<Integer> raffleArray = new ArrayList<>();
+            } else if (choice == 3) {
+                if (toys.size() == 0) {
+                    showToys(toys);
+                    System.out.println("\nНажмите любую клавишу и Enter для выхода в главное меню: ");
+                    choice = scanner.nextInt();
+                    choice =-1;
+                } else {
+                    List<Integer> firstDischargeArray = new ArrayList<>();
+                    List<Integer> randArray = new ArrayList<>();
+                    List<Integer> raffleArray = new ArrayList<>();
                 
-                for (Toy toy : toys) {
-                    for(int i =0; i < toy.getWeight(); i++) {
-                        firstDischargeArray.add(toy.getID());
-                    }
-                }          
-                
-                int indexId = 0;
-                int count = 0;
-                for(int i = 0; i < firstDischargeArray.size(); i++) {                    
-                    while(true) {
-                        indexId = 0;
-                        count = 0;
-                        indexId = rand.nextInt(firstDischargeArray.size());
-                        if (randArray.size() == 0) {
-                            randArray.add(indexId);
-                        } else {                        
-                            for(int j =0; j < randArray.size(); j++) {
-                                if (randArray.get(j) == indexId) {
-                                    count++;
+                    for (Toy toy : toys) {
+                        for(int i =0; i < toy.getWeight(); i++) {
+                            firstDischargeArray.add(toy.getID());
+                        }
+                    }                
+                    int indexId = 0;
+                    int count = 0;
+                    for(int i = 0; i < firstDischargeArray.size(); i++) {                    
+                        while(true) {
+                            indexId = 0;
+                            count = 0;
+                            indexId = rand.nextInt(firstDischargeArray.size());
+                            if (randArray.size() == 0) {
+                                randArray.add(indexId);
+                            } else {                        
+                                for(int j =0; j < randArray.size(); j++) {
+                                    if (randArray.get(j) == indexId) {
+                                        count++;
+                                    }
                                 }
                             }
-                        }
-                        if (count == 0) {
-                            randArray.add(indexId);
+                            if (count == 0) {
+                                randArray.add(indexId);
+                                break;
+                            }
+                            }   
+                        raffleArray.add(firstDischargeArray.get(indexId));
+                    }
+                    indexId = rand.nextInt(raffleArray.size());
+                    for(Toy toy : toys) {
+                        if (toy.getID() == raffleArray.get(indexId)) {
+                            System.out.println("Вы выиграли: " + toy.getName());
+                            writingToFile(toy.getName());
+                            toys.remove(toy);
+                            System.out.println("Находятся в розыгрыше: ");
+                            showToys(toys);
                             break;
                         }
                     }
-                    raffleArray.add(firstDischargeArray.get(indexId));
-                }
-                indexId = rand.nextInt(raffleArray.size());
-                for(Toy toy : toys) {
-                    if (toy.getID() == raffleArray.get(indexId)) {
-                        System.out.println("Вы выиграли: " + toy.getName());
-                        toys.remove(toy);
-                        System.out.println("Находятся в розыгрыше: ");
-                        showToys(toys);
-                    }
-                }
-                System.out.println("\nНажмите любую клавишу и Enter для выхода в главное меню: ");
-                choice = scanner.nextInt();
-                choice =-1;
+                    System.out.println("\nНажмите любую клавишу и Enter для выхода в главное меню: ");
+                    choice = scanner.nextInt();
+                    choice =-1;
+                }                
             } else {
                 System.out.println("\nКоманда введена некорректно!\nПовторите попытку!\n");
-            }
-        }
+            }            
+        }        
     }
 
     public static void main(String[] args) {
@@ -120,6 +144,5 @@ public class Program {
         toys.add(toy4);
 
         menu(toys);
-    }
-      
+    }      
 }
